@@ -1,6 +1,6 @@
 export const generateMessage = async (payload: Record<string, string>) => {
   const response = await fetch(
-    "https://n8n.ianman.com/webhook-test/generate-message",
+    "https://n8n.ianman.com/webhook/generate-message",
     {
       method: "POST",
       headers: {
