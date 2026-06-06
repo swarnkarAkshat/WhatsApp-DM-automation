@@ -3,6 +3,7 @@ import { Header } from './components/Header';
 import { LeadForm } from './components/LeadForm';
 import { MessagePreview } from './components/MessagePreview';
 import { Footer } from './components/Footer';
+import { generateMessage } from './services/messageService';
 
 function App() {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,50 +14,38 @@ function App() {
     setGeneratedMessage(null);
 
     try {
-      const response = await fetch('/api/webhook/generate-message', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const text = await response.text();
-      let msg = text;
-
-      try {
-        const json = JSON.parse(text);
-        if (Array.isArray(json) && json.length > 0) {
-          msg = json[0].message || json[0].text || json[0].output || text;
-        } else if (json && typeof json === 'object') {
-          msg = json.message || json.text || json.output || text;
+      const response = await generateMessage(data);
+      
+      // Helper function to deeply search for a "message" key
+      const extractMessageDeep = (obj: any): string | null => {
+        if (typeof obj === 'string') return obj; // If it's just a string, return it
+        if (!obj || typeof obj !== 'object') return null;
+        
+        if ('message' in obj && typeof obj.message === 'string') {
+          return obj.message;
         }
-      } catch (e) {
-        console.warn("JSON parse failed, attempting regex extraction.");
-      }
-
-      // Aggressive fallback: if the string still looks like the raw n8n JSON output, extract it
-      if (typeof msg === 'string' && msg.includes('"message"')) {
-        const match = msg.match(/"message"\s*:\s*"([\s\S]*?)"(?=\s*}|\s*,)/);
-        if (match) {
-          msg = match[1];
+        if ('text' in obj && typeof obj.text === 'string') {
+          return obj.text;
         }
-      }
 
-      // Crucial: Replace literal '\n' characters from the raw string with actual newlines
-      // so that whitespace-pre-wrap can render them as real paragraphs.
-      if (typeof msg === 'string') {
-        msg = msg.replace(/\\n/g, '\n').replace(/\\"/g, '"');
-      }
+        // Recursively check all values
+        for (const key of Object.keys(obj)) {
+          const result = extractMessageDeep(obj[key]);
+          if (result) return result;
+        }
+        return null;
+      };
 
-      setGeneratedMessage(msg);
+      const extractedMessage = extractMessageDeep(response);
+
+      if (extractedMessage) {
+        setGeneratedMessage(extractedMessage);
+      } else {
+        setGeneratedMessage(JSON.stringify(response, null, 2));
+      }
     } catch (error) {
       console.error('Error generating message:', error);
-      setGeneratedMessage('An error occurred while communicating with the automation engine. Please try again.');
+      setGeneratedMessage('Failed to connect to automation workflow.\n\nPlease try again.');
     } finally {
       setIsLoading(false);
     }

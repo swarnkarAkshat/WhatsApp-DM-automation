@@ -32,11 +32,23 @@ export const MessagePreview: React.FC<MessagePreviewProps> = ({ isLoading, messa
             </p>
           </div>
         ) : (
-          <div className="flex-1 flex flex-col">
-            <div className="bg-white rounded-lg p-7 shadow-sm border border-slate-200 mb-6 relative overflow-hidden">
-              <div className="absolute top-0 left-0 w-1 h-full bg-navy"></div>
-              <div className="text-slate-800 whitespace-pre-wrap text-[15px] leading-relaxed">
+          <div className="flex-1 flex flex-col bg-[#efeae2] rounded-xl p-6 relative overflow-hidden shadow-inner border border-gray-200">
+            {/* Subtle Chat Background Pattern (optional, using simple CSS) */}
+            <div className="absolute inset-0 opacity-10 bg-[url('https://static.whatsapp.net/rsrc.php/v3/yl/r/r2q893L13_r.png')] bg-repeat z-0 pointer-events-none"></div>
+            
+            <div className="relative z-10 flex w-full justify-end">
+              <div className="bg-[#d9fdd3] text-[#111b21] max-w-[85%] rounded-lg rounded-tr-none px-4 py-3 shadow-sm relative text-[15px] leading-relaxed whitespace-pre-wrap">
+                {/* Tail for bubble */}
+                <div className="absolute top-0 -right-[8px] w-0 h-0 border-t-[10px] border-t-[#d9fdd3] border-r-[10px] border-r-transparent"></div>
+                
                 {message}
+                
+                <div className="flex justify-end mt-1 space-x-1 items-center">
+                  <span className="text-[11px] text-gray-500 font-medium">Just now</span>
+                  <svg viewBox="0 0 16 15" width="16" height="15" className="fill-blue-500 opacity-80">
+                    <path d="M15.01 3.316l-.478-.372a.365.365 0 0 0-.51.063L8.666 9.88a.32.32 0 0 1-.484.032l-.358-.325a.32.32 0 0 0-.484.032l-.378.48a.418.418 0 0 0 .036.54l1.32 1.267a.32.32 0 0 0 .484-.034l6.272-8.048a.366.366 0 0 0-.064-.512zm-4.1 0l-.478-.372a.365.365 0 0 0-.51.063L4.566 9.88a.32.32 0 0 1-.484.032L1.892 7.72a.366.366 0 0 0-.516.005l-.423.433a.364.364 0 0 0 .006.514l3.255 3.185a.32.32 0 0 0 .484-.033l6.272-8.048a.365.365 0 0 0-.063-.51z" />
+                  </svg>
+                </div>
               </div>
             </div>
           </div>
